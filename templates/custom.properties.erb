@@ -1,7 +1,7 @@
-# DSpace build.properties
+# Custom DSpace build.properties
 # This file should be customised to suit your build environment.
 # Note that not all configuration is handled here, only the most common
-# properties that tend to differ between build environments. 
+# properties that tend to differ between build environments.
 # For adjusting global settings or more complex settings, edit the relevant config file.
 #
 # IMPORTANT: Do not remove or comment out settings in build.properties
@@ -22,7 +22,7 @@
 # to install DSpace. NOTE: this value will be copied over to the
 # "dspace.dir" setting in the final "dspace.cfg" file. It can be
 # modified later on in your "dspace.cfg", if needed.
-dspace.install.dir=/home/vagrant/dspace
+dspace.install.dir=<%=@install_dir%>
 
 # DSpace host name - should match base URL.  Do not include port number
 dspace.hostname = localhost
@@ -41,7 +41,7 @@ dspace.ui = xmlui
 dspace.url = ${dspace.baseUrl}/${dspace.ui}
 
 # Name of the site
-dspace.name = DSpace on Vagrant
+dspace.name = My DSpace Site
 
 # Solr server
 solr.server=http://localhost:8080/solr
@@ -100,7 +100,7 @@ db.poolname = dspacepool
 #######################
 
 # SMTP mail server
-mail.server = 
+mail.server =
 
 # SMTP mail server authentication username and password (if required)
 # mail.server.username = myusername
@@ -146,14 +146,15 @@ mail.registration.notify=
 handle.canonical.prefix = ${dspace.url}/handle/
 #
 # Note that this will not alter dc.identifer.uri metadata for existing
-# items (only for subsequent submissions), but it will alter the URL 
+# items (only for subsequent submissions), but it will alter the URL
 # in JSPUI's 'identifier' message on item record pages for existing items.
 #
 # If omitted, the canonical URL prefix will be http://hdl.handle.net/
 #handle.canonical.prefix = http://hdl.handle.net/
 
 # CNRI Handle prefix
-handle.prefix = 10673
+# (Defaults to a dummy/fake prefix of 123456789)
+handle.prefix = 123456789
 
 #######################
 # PROXY CONFIGURATION #

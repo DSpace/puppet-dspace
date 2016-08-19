@@ -28,7 +28,7 @@
 # DSpace installation directory.
 # This is the location where you want to install DSpace.
 # Windows note: Please remember to use forward slashes for all paths (e.g. C:/dspace)
-dspace.dir=/home/vagrant/dspace
+dspace.dir=<%=@install_dir%>
 
 # DSpace host name - should match base URL.  Do not include port number
 dspace.hostname = localhost
@@ -47,7 +47,7 @@ dspace.ui = xmlui
 #dspace.url = ${dspace.baseUrl}/${dspace.ui}
 
 # Name of the site
-dspace.name = Vagrant DSpace
+dspace.name = My DSpace Site
 
 # Default language for metadata values
 #default.language = en_US
@@ -152,7 +152,7 @@ db.schema = public
 #handle.canonical.prefix = ${dspace.url}/handle/
 #
 # Note that this will not alter dc.identifer.uri metadata for existing
-# items (only for subsequent submissions), but it will alter the URL 
+# items (only for subsequent submissions), but it will alter the URL
 # in JSPUI's 'identifier' message on item record pages for existing items.
 #
 # If omitted, the canonical URL prefix will be http://hdl.handle.net/
@@ -160,8 +160,7 @@ db.schema = public
 
 # CNRI Handle prefix
 # (Defaults to a dummy/fake prefix of 123456789)
-#handle.prefix = 123456789
-handle.prefix = 10673
+handle.prefix = 123456789
 
 #######################
 # PROXY CONFIGURATION #

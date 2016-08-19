@@ -55,7 +55,7 @@ class dspace($java_version = "7")
       unless  => "test \$(readlink /etc/alternatives/java) = '${java_install_dir}/${java_name}/jre/bin/java'",
       path    => "/usr/bin:/usr/sbin:/bin",
     }
- 
+
  ->
 
     # Create a "default-java" symlink (for easier JAVA_HOME setting). Overwrite if existing.

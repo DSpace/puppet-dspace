@@ -17,7 +17,7 @@
 # - $install_dir        => Location where DSpace instance should be installed (defaults to the home directory of $owner at ~/dspace)
 # - $git_repo           => Git repository to pull DSpace source from. Defaults to DSpace/DSpace in GitHub
 # - $git_branch         => Git branch to build DSpace from. Defaults to "master".
-# - $mvn_params         => Any build params passed to Maven. Defaults to "-Denv=vagrant" which tells Maven to use the vagrant.properties file.
+# - $mvn_params         => Any build params passed to Maven. Defaults to "-Denv=custom" which tells Maven to use the custom.properties file.
 # - $ant_installer_dir  => Full path of directory where the Ant installer is built to (via Maven).
 # - $admin_firstname    => First Name of the created default DSpace Administrator account.
 # - $admin_lastname     => Last Name of the created default DSpace Administrator account.
@@ -28,15 +28,15 @@
 #
 # Sample Usage:
 # dspace::install {
-#    owner      => "vagrant",
-#    version    => "4.0-SNAPSHOT",
+#    owner      => "dspace",
+#    version    => "6.0-SNAPSHOT",
 #    git_branch => "master",
 # }
 #
 define dspace::install ($owner,
                         $version,
                         $group             = $owner,
-                        $src_dir           = "/home/${owner}/dspace-src", 
+                        $src_dir           = "/home/${owner}/dspace-src",
                         $install_dir       = "/home/${owner}/dspace",
                         $git_repo          = "https://github.com/DSpace/DSpace.git",
                         $git_branch        = "master",
@@ -67,9 +67,9 @@ define dspace::install ($owner,
         group   => $group,
         content => template("dspace/profile.erb"),
     }
- 
+
 ->
-   
+
     ### BEGIN clone of DSpace from GitHub to ~/dspace-src (this is a bit of a strange way to ckeck out, we do it this
     ### way to support cases where src_dir already exists)
 
@@ -108,16 +108,16 @@ define dspace::install ($owner,
 
 ->
 
-   # Create a 'vagrant.properties' file which will be used by older versions of DSpace to build the DSpace installer
+   # Create a 'custom.properties' file which will be used by older versions of DSpace to build the DSpace installer
    # (INSTEAD OF the default 'build.properties' file that DSpace normally uses)
    # kept for backwards compatibility, no longer needed for DSpace 6+
-   file { "${src_dir}/vagrant.properties":
+   file { "${src_dir}/custom.properties":
      ensure  => file,
      owner   => $owner,
      group   => $group,
      mode    => 0644,
      backup  => ".puppet-bak",  # If replaced, backup old settings to .puppet-bak
-     content => template("dspace/vagrant.properties.erb"),
+     content => template("dspace/custom.properties.erb"),
    }
 
 ->
@@ -135,14 +135,14 @@ define dspace::install ($owner,
 ->
 
    # Build DSpace installer.
-   # (NOTE: by default, $mvn_params='-Denv=vagrant', which tells Maven to use the vagrant.properties file created above)
+   # (NOTE: by default, $mvn_params='-Denv=custom', which tells Maven to use the custom.properties file created above)
    exec { "Build DSpace installer in ${src_dir}":
      command   => "mvn package ${mvn_params}",
      cwd       => "${src_dir}", # Run command from this directory
      user      => $owner,
      creates   => $ant_installer_dir, # Only run if Ant installer directory doesn't already exist
      timeout   => 0, # Disable timeout. This build takes a while!
-     logoutput => true,	# Send stdout to puppet log file (if any)
+     logoutput => true,    # Send stdout to puppet log file (if any)
    }
 
 ->
@@ -150,14 +150,14 @@ define dspace::install ($owner,
    # Install DSpace (via Ant)
    exec { "Install DSpace to ${install_dir}":
      command   => "ant fresh_install",
-     cwd       => $ant_installer_dir,	# Run command from this directory
+     cwd       => $ant_installer_dir,    # Run command from this directory
      user      => $owner,
-     creates   => "${install_dir}/webapps/xmlui",	# Only run if XMLUI webapp doesn't yet exist (NOTE: we check for a webapp's existence since this is the *last step* of the install process)
-     logoutput => true,	# Send stdout to puppet log file (if any)
-   } 
+     creates   => "${install_dir}/webapps/xmlui",    # Only run if XMLUI webapp doesn't yet exist (NOTE: we check for a webapp's existence since this is the *last step* of the install process)
+     logoutput => true,    # Send stdout to puppet log file (if any)
+   }
 
    # Create initial administrator (if specified)
-   if $admin_email and $admin_passwd and $admin_firstname and $admin_lastname and $admin_language 
+   if $admin_email and $admin_passwd and $admin_firstname and $admin_lastname and $admin_language
    {
      exec { "Create DSpace Administrator":
        command   => "${install_dir}/bin/dspace create-administrator -e ${admin_email} -f ${admin_firstname} -l ${admin_lastname} -p ${admin_passwd} -c ${admin_language}",
