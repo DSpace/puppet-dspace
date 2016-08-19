@@ -84,7 +84,7 @@ define dspace::owner ($username = $name,
         file { "Give ${username} full sudo access":
           path    => "/etc/sudoers.d/${username}",
           mode    => 0440,			# Required mode of all files in /etc/sudoers.d/
-          content => "<%=@username%> ALL=(ALL) NOPASSWD:ALL",
+          content => "${username} ALL=(ALL) NOPASSWD:ALL",
           require => User[$username],
         }
       }
