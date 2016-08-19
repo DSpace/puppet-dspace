@@ -6,17 +6,16 @@
 # - Ubuntu 16.04
 #
 # Parameters:
-# - $username (REQUIRED) => OS Username (e.g. "dspace")
+# - $username (REQUIRED) => OS Username (e.g. "dspace"), defaults to passed in $name
 # - $gid                 => OS User's primary group (default is same as $username)
 # - $groups		         => Additional groups (by name) to add user to
 # - $sudoer              => Whether this person gets sudoer access (true or false, default=false)
 # - $ensure              => Whether to ensure account is added (present) or deleted (absent)
 #
 # Sample Usage:
-# dspace::owner {
-#    username => "dspace",
+# dspace::owner { 'dspace':
 # }
-define dspace::owner ($username,
+define dspace::owner ($username = $name,
                       $gid = $username,
                       $groups = undef,
                       $sudoer = false,
@@ -96,7 +95,7 @@ define dspace::owner ($username,
         ensure  => file,
         owner   => $username,
         group   => $gid,
-        content => template("dspace/user-profile.erb"),             
+        content => template("dspace/user-profile.erb"),
         require => User[$username],
       }
     }
@@ -122,4 +121,5 @@ define dspace::owner ($username,
       }
     }
     default: { fail "Unknown ${ensure} value for ensure" }
+  }
 }

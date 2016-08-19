@@ -20,7 +20,7 @@
 # - $catalina_home      => Full path to Catalina Home (default=/usr/share/$package)
 # - $catalina_base      => Full path to Catalina Base (default=/var/lib/$package)
 # - $catalina_opts      => Options to pass to Tomcat (default='-Djava.awt.headless=true -Dfile.encoding=UTF-8 -Xmx2048m -Xms1024m -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC')
-# - $app_base           => Directory where Tomcat should load webapps (default='/home/$owner/dspace/webpps')
+# - $app_base           => Directory where Tomcat should load webapps (default=$name)
 #
 # Sample Usage:
 # dspace::tomcat {
@@ -30,8 +30,8 @@ define dspace::tomcat ($package,
                        $owner,
                        $service = $package,
                        $catalina_home = "/usr/share/${service}",
-                       $catalina_base = "/usr/shar/${service}",
-                       $app_base      = "/home/${owner}/dspace/webapps",
+                       $catalina_base = "/usr/share/${service}",
+                       $app_base      = $name,
                        $catalina_opts = "-Djava.awt.headless=true -Dfile.encoding=UTF-8 -Xmx2048m -Xms1024m -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC")
 {
 

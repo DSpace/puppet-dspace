@@ -4,16 +4,15 @@
 # - installs pre-requisites for DSpace (Java, Maven, Ant, Tomcat)
 #
 # Tested on:
-# - Ubuntu 12.04
-# - Ubuntu 14.04
+# - Ubuntu 16.04
 #
 # Parameters:
-# - $java => version of Java (6 or 7)
+# - $java => version of Java (e.g. "8")
 #
 # Sample Usage:
 # include dspace
 #
-class dspace($java_version = "7")
+class dspace($java_version = "8")
 {
     # Default to requiring all packages be installed
     Package {
@@ -41,7 +40,7 @@ class dspace($java_version = "7")
     # OpenJDK version/directory name (NOTE: $architecture is a "fact")
     $java_name = "java-${java_version}-openjdk-${architecture}"
 
-    # Install Java, based on set $java_version (passed to Puppet in VagrantFile)
+    # Install Java, based on set $java_version
     package { "java":
       name => "openjdk-${java_version}-jdk",  # Install OpenJDK package (as Oracle JDK tends to require a more complex manual download & unzip)
     }

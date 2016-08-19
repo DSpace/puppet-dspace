@@ -6,15 +6,14 @@
 #  - DSpace Ant installation process is run (if it has not yet been run)
 #
 # Tested on:
-# - Ubuntu 12.04
-# - Ubuntu 14.04
+# - Ubuntu 16.04
 #
 # Parameters:
 # - $owner (REQUIRED)   => OS User who should own DSpace instance
 # - $version (REQUIRED) => Version of DSpace to install (e.g. "3.0", "3.1", "4.0", etc)
 # - $group              => Group who should own DSpace instance. Defaults to same as $owner
 # - $src_dir            => Location where DSpace source should be kept (defaults to the home directory of $owner at ~/dspace-src)
-# - $install_dir        => Location where DSpace instance should be installed (defaults to the home directory of $owner at ~/dspace)
+# - $install_dir        => Location where DSpace instance should be installed (defaults to $name)
 # - $git_repo           => Git repository to pull DSpace source from. Defaults to DSpace/DSpace in GitHub
 # - $git_branch         => Git branch to build DSpace from. Defaults to "master".
 # - $mvn_params         => Any build params passed to Maven. Defaults to "-Denv=custom" which tells Maven to use the custom.properties file.
@@ -27,7 +26,7 @@
 # - $ensure => Whether to ensure DSpace instance is created ('present', default value) or deleted ('absent')
 #
 # Sample Usage:
-# dspace::install {
+# dspace::install { '/dspace':
 #    owner      => "dspace",
 #    version    => "6.0-SNAPSHOT",
 #    git_branch => "master",
@@ -37,7 +36,7 @@ define dspace::install ($owner,
                         $version,
                         $group             = $owner,
                         $src_dir           = "/home/${owner}/dspace-src",
-                        $install_dir       = "/home/${owner}/dspace",
+                        $install_dir       = $name,
                         $git_repo          = "https://github.com/DSpace/DSpace.git",
                         $git_branch        = "master",
                         $mvn_params        = "",

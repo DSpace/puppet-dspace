@@ -1,4 +1,4 @@
-# Definition: dspace::postgresql
+# Definition: dspace::postgresql_db
 #
 # Installs a PostgreSQL database (prerequisite for DSpace) with the
 # given parameters, using the following Puppet PostgreSQL module (or a compatible one)
@@ -16,19 +16,19 @@
 # Parameters:
 # - $version (REQUIRED) => Version of PostgreSQL to install (e.g. "9.4", etc)
 # - $postgres_password  => Password for the 'postgres' user who owns Postgres (default='postgres')
-# - $db_name            => Name of database to create for DSpace (default='dspace')
-# - $db_user            => Name of database user to create for DSpace (default='dspace')
-# - $db_password        => Password of DSpace database user (default='dspace')
+# - $db_name            => Name of database to create for DSpace (default=$name)
+# - $user            => Name of database user to create for DSpace (default='dspace')
+# - $password        => Password of DSpace database user (default='dspace')
 #
 # Sample Usage:
-# dspace::postgresql {
+# dspace::postgresql_db { 'dspace':
 #    version    => "9.4",
 # }
-define dspace::postgresql ($version,
-                           $postgres_password = 'postgres',
-                           $db_name = 'dspace',
-                           $db_user = 'dspace',
-                           $db_password = 'dspace')
+define dspace::postgresql_db ($version,
+                              $postgres_password = 'postgres',
+                              $db_name = $name,
+                              $user = 'dspace',
+                              $password = 'dspace')
 {
 
     # Init PostgreSQL module
@@ -57,10 +57,10 @@ define dspace::postgresql ($version,
     # (includes various extensions, like pgcrypto which is required by DSpace)
     class { 'postgresql::server::contrib': }
 
-    # Create a 'dspace' database & 'dspace' user account (which owns the database)
+    # Create a database & user account (which owns the database)
     postgresql::server::db { $db_name:
-      user     => $db_user,
-      password => $db_password
+      user     => $user,
+      password => $password
     }
 
     # Activate the 'pgcrypto' extension on our 'dspace' database
