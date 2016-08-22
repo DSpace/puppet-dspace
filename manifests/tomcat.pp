@@ -14,8 +14,9 @@
 # - Ubuntu 16.04
 #
 # Parameters:
-# - $package (REQUIRED) => Tomcat package to install (e.g. "tomcat7", "tomcat8", etc)
-# - $owner (REQUIRED)   => OS account which should own Tomcat (i.e. who Tomcat should run as)
+# - $package (REQUIRED) => Tomcat package to install (e.g. 'tomcat7', 'tomcat8', etc)
+# - $owner              => OS account which should own Tomcat (i.e. who Tomcat should run as). Default=name of package (e.g. tomcat8)
+# - $group              => OS group which should own Tomcat (default is same as $owner)
 # - $service            => Name of the default Tomcat service (default is same as $package)
 # - $catalina_home      => Full path to Catalina Home (default=/usr/share/$package)
 # - $catalina_base      => Full path to Catalina Base (default=/var/lib/$package)
@@ -24,14 +25,16 @@
 #
 # Sample Usage:
 # dspace::tomcat {
-#    package    => "tomcat7",
+#    package    => 'tomcat8',
 # }
 define dspace::tomcat ($package,
-                       $owner,
+                       $owner = $package,
+                       $group = $package,
                        $service = $package,
-                       $catalina_home = "/usr/share/${service}",
-                       $catalina_base = "/usr/share/${service}",
+                       $catalina_home = "/usr/share/${package}",
+                       $catalina_base = "/var/lib/${package}",
                        $app_base      = $name,
+                       $port          = 8080,
                        $catalina_opts = "-Djava.awt.headless=true -Dfile.encoding=UTF-8 -Xmx2048m -Xms1024m -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC")
 {
 
@@ -39,21 +42,40 @@ define dspace::tomcat ($package,
   # as we utilize 'file_line' from that module
   include stdlib
 
-  # Init Tomcat module
+  # Init Tomcat module with global defaults
   # (We use https://github.com/puppetlabs/puppetlabs-tomcat/)
   class {'tomcat':
-    install_from_source => false,           # Do NOT install from source, we'll use package manager
-    catalina_home       => $catalina_home,
+    catalina_home       => $catalina_home,  # Installation directory location
+    user                => $owner,          # Ensure installation directory owned by $owner
+    group               => $group,
     manage_user         => false,           # Don't let Tomcat module manage which user/group to start with, package does this already
     manage_group        => false,
     require             => Class['dspace'], # Require DSpace was initialized, so that Java is installed
   }
 
 ->
-  # Create a new Tomcat instance & install from package manager
-  tomcat::instance { 'default':
-    package_name    => $package,         # Name of the tomcat package to install
-    package_ensure  => installed,        # Ensure package is installed
+
+  # Create a new Tomcat instance
+  tomcat::instance { "Default ${package} instance":
+    catalina_base       => $catalina_base,  # Base directory for this instance
+    install_from_source => false,           # Don't install from source, we'll use package manager to install Tomcat
+    package_name        => $package,        # Name of Tomcat package
+    package_ensure      => installed,       # Ensure it is installed
+    manage_service      => false,           # Don't let module manage the service, as it is installed by package manager
+  }
+
+->
+
+  # Update the default HTTP connector to use specified $port and UTF-8
+  tomcat::config::server::connector { "Default ${package} HTTP connector":
+    catalina_base       => $catalina_base,  # Tomcat instance this pertains to
+    port                => $port,           # Port to run on
+    protocol            => 'HTTP/1.1',
+    additional_attributes => {
+      'connectionTimeout' => '20000',
+      'URIEncoding'       => 'UTF-8',
+      'redirectPort'      => '8443'
+    },
   }
 
 ->
@@ -61,10 +83,10 @@ define dspace::tomcat ($package,
   # Override the default Tomcat <Host name='localhost'> entry
   # and point it at the DSpace webapps directory (so that it loads all DSpace webapps)
   tomcat::config::server::host { 'localhost':
-    app_base              => $app_base,     # Tell Tomcat to load webapps from this directory
+    app_base              => $app_base,          # Tell Tomcat to load webapps from this directory
     host_ensure           => present,
-    catalina_base         => $catalina_base,                 # Tomcat install this pertains to
-    additional_attributes => {                               # Additional Tomcat <Host> attributes
+    catalina_base         => $catalina_base,     # Tomcat instance this pertains to
+    additional_attributes => {                   # Additional Tomcat <Host> attributes
       'autoDeploy' => 'true',
       'unpackWARs' => 'true',
     },
@@ -82,23 +104,21 @@ define dspace::tomcat ($package,
 ->
 
   # Modify the Tomcat "defaults" file to make Tomcat run as the $owner
-  # NOTE: This seems to be the ONLY way to do this in Ubuntu, which is disappointing
+  # NOTE: This seems to be the ONLY way to update /etc/init.d script when installing from packages on Ubuntu.
   file_line { 'Update Tomcat to run as ${owner}':
     path   => "/etc/default/${service}",    # File to modify
-    line   => "TOMCAT7_USER=${owner}",      # Line to add to file
-    match  => "^TOMCAT7_USER=.*$",              # Regex for line to replace (if found)
-    notify => Service['tomcat'],                # If changes are made, notify Tomcat to restart
+    line   => join([upcase($service), "_USER=${owner}"], ""),   # Line to add (e.g. TOMCAT8_USER=$owner)
+    match  => join(["^", upcase($service), "_USER=.*$"], ""),   # Regex for line to replace (if found)
   }
 
 ->
 
   # Modify the Tomcat "defaults" file to set custom JAVA_OPTS based on the $catalina_opts
-  # Again, seems to be the only way to easily do this in Ubuntu.
+  # Again, seems to be the ONLY way to update /etc/init.d script when installing from packages on Ubuntu.
   file_line { 'Update Tomcat run options':
     path   => "/etc/default/${service}",        # File to modify
     line   => "JAVA_OPTS=\"${catalina_opts}\"", # Line to add to file
     match  => "^JAVA_OPTS=.*$",                 # Regex for line to replace (if found)
-    notify => Service['tomcat'],                # If changes are made, notify Tomcat to restart
   }
 
 ->
@@ -107,19 +127,20 @@ define dspace::tomcat ($package,
   # and all subdirectories need to be owned by $owner
   file { $catalina_base:
     ensure  => directory,
-    owner   => $owner,    # Change owner
-    recurse => true,      # Also change owner of subdirectories/files
-    links   => follow,    # Follow any links to and change ownership there too
+    owner   => $owner,              # Change owner
+    recurse => true,                # Also change owner of subdirectories/files
+    links   => follow,              # Follow any links to and change ownership there too
+    notify  => Service['tomcat'],   # Notify service to restart (from all changes above)
   }
 
 ->
 
-  # This service is auto-created by package manager when installing Tomcat
+  # This service is auto-created in /etc/init.d by package manager
   # But, we just want to make sure it is running & starts on boot
   service {'tomcat':
     name   => $service,
-    enable => 'true',
-    ensure => 'running',
+    enable => true,
+    ensure => running,
   }
 
 }

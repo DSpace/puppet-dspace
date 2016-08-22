@@ -14,21 +14,23 @@
 # - Ubuntu 16.04
 #
 # Parameters:
-# - $version (REQUIRED) => Version of PostgreSQL to install (e.g. "9.4", etc)
-# - $postgres_password  => Password for the 'postgres' user who owns Postgres (default='postgres')
+# - $version (REQUIRED) => Version of PostgreSQL to install (e.g. '9.4', '9.5', etc)
+# - $postgres_password  => Password for the 'postgres' user who owns Postgres (default=undef, i.e. no password)
 # - $db_name            => Name of database to create for DSpace (default=$name)
 # - $user            => Name of database user to create for DSpace (default='dspace')
 # - $password        => Password of DSpace database user (default='dspace')
+# - $port            => PostgreSQL port (default=5432)
 #
 # Sample Usage:
 # dspace::postgresql_db { 'dspace':
-#    version    => "9.4",
+#    version => '9.4',
 # }
 define dspace::postgresql_db ($version,
-                              $postgres_password = 'postgres',
+                              $postgres_password = undef,
                               $db_name = $name,
                               $user = 'dspace',
-                              $password = 'dspace')
+                              $password = 'dspace',
+                              $port = 5432)
 {
 
     # Init PostgreSQL module
@@ -51,6 +53,7 @@ define dspace::postgresql_db ($version,
       ip_mask_allow_all_users    => '0.0.0.0/0',   # allow other users to connect from any IP
       listen_addresses           => '*',           # accept connections from any IP/machine
       postgres_password          => $postgres_password,      # set password for "postgres"
+      port                       => $port,
     }
 
     # Ensure the PostgreSQL contrib package is installed
@@ -60,13 +63,14 @@ define dspace::postgresql_db ($version,
     # Create a database & user account (which owns the database)
     postgresql::server::db { $db_name:
       user     => $user,
-      password => $password
+      password => postgresql_password($user, $password),
     }
 
     # Activate the 'pgcrypto' extension on our 'dspace' database
     # This is REQUIRED by DSpace 6 and above
     postgresql::server::extension { 'pgcrypto':
       database => $db_name,
+      ensure   => 'present',
     }
 
 }
