@@ -64,7 +64,7 @@ define dspace::tomcat_instance ($package,
       ->
 
       # Create a new Tomcat instance
-      tomcat::instance { "Default ${package} instance":
+      tomcat::instance { $catalina_base:
         catalina_base       => $catalina_base,  # Base directory for this instance
         install_from_source => false,           # Don't install from source, we'll use package manager to install Tomcat
         package_name        => $package,        # Name of Tomcat package
@@ -98,17 +98,26 @@ define dspace::tomcat_instance ($package,
           'autoDeploy' => 'true',
           'unpackWARs' => 'true',
         },
-        notify                => Service['tomcat'],              # If changes are made, notify Tomcat to restart
+        notify                => [Exec['Stop default Tomcat temporarily'], Service['tomcat']],   # If changes are made, notify Tomcat to restart
+      }
+
+      # Temporarily stop Tomcat, so that we can modify which user it runs as
+      # (We cannot tweak the Tomcat run-as user while it is running)
+      exec { 'Stop default Tomcat temporarily':
+        command     => "service ${service} stop",
+        refreshonly => true,
       }
 
       # Modify the Tomcat "defaults" file to make Tomcat run as the $owner
       # NOTE: This seems to be the ONLY way to update /etc/init.d script when installing from packages on Ubuntu.
-      file_line { 'Update Tomcat to run as ${owner}':
+      file_line { "Update Tomcat to run as ${owner}":
         path   => "/etc/default/${service}",    # File to modify
         line   => join([upcase($service), "_USER=${owner}"], ""),   # Line to add (e.g. TOMCAT8_USER=$owner)
         match  => join(["^", upcase($service), "_USER=.*$"], ""),   # Regex for line to replace (if found)
-        notify => Service['tomcat'],               # Notify service to restart
+        require => Exec['Stop default Tomcat temporarily'],  # Only run if default tomcat triggered stop
+        notify => Service['tomcat'],                         # Notify service to restart
       }
+
 
       # Modify the Tomcat "defaults" file to set custom JAVA_OPTS based on the $catalina_opts
       # Again, seems to be the ONLY way to update /etc/init.d script when installing from packages on Ubuntu.
@@ -116,7 +125,8 @@ define dspace::tomcat_instance ($package,
         path   => "/etc/default/${service}",        # File to modify
         line   => "JAVA_OPTS=\"${catalina_opts}\"", # Line to add to file
         match  => "^JAVA_OPTS=.*$",                 # Regex for line to replace (if found)
-        notify => Service['tomcat'],               # Notify service to restart
+        require => Exec['Stop default Tomcat temporarily'],  # Only run if default tomcat triggered stop
+        notify => Service['tomcat'],                         # Notify service to restart
       }
 
       # In order for Tomcat to function properly, the entire CATALINA_BASE directory
@@ -126,7 +136,8 @@ define dspace::tomcat_instance ($package,
         owner   => $owner,              # Change owner
         recurse => true,                # Also change owner of subdirectories/files
         links   => follow,              # Follow any links to and change ownership there too
-        notify  => Service['tomcat'],   # Notify service to restart (from all changes above)
+        require => Exec['Stop default Tomcat temporarily'],  # Only run if default tomcat triggered stop
+        notify => Service['tomcat'],                         # Notify service to restart
       }
 
       # This service is auto-created in /etc/init.d by package manager

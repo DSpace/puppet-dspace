@@ -45,7 +45,7 @@ define dspace::postgresql_db ($version,
       version  => $version,
     }
 
-->
+    ->
 
     # Setup/Configure PostgreSQL server
     class { 'postgresql::server':
@@ -64,6 +64,7 @@ define dspace::postgresql_db ($version,
     postgresql::server::db { $db_name:
       user     => $user,
       password => postgresql_password($user, $password),
+      owner    => $user,
     }
 
     # Activate the 'pgcrypto' extension on our 'dspace' database
