@@ -54,8 +54,6 @@ define dspace::tomcat_instance ($package,
       # (We use https://github.com/puppetlabs/puppetlabs-tomcat/)
       class {'tomcat':
         catalina_home       => $catalina_home,  # Installation directory location
-        user                => $owner,          # Ensure installation directory owned by $owner
-        group               => $group,
         manage_user         => false,           # Don't let Tomcat module manage which user/group to start with, package does this already
         manage_group        => false,
         require             => Class['dspace'], # Require DSpace was initialized, so that Java is installed
@@ -65,7 +63,6 @@ define dspace::tomcat_instance ($package,
 
       # Create a new Tomcat instance
       tomcat::instance { $catalina_base:
-        catalina_base       => $catalina_base,  # Base directory for this instance
         install_from_source => false,           # Don't install from source, we'll use package manager to install Tomcat
         package_name        => $package,        # Name of Tomcat package
         package_ensure      => installed,       # Ensure it is installed
@@ -101,6 +98,8 @@ define dspace::tomcat_instance ($package,
         notify                => Service['tomcat'],   # If changes are made, notify Tomcat to restart
       }
 
+      ->
+
       # Temporarily stop Tomcat, so that we can modify which user it runs as
       # (We cannot tweak the Tomcat run-as user while it is running)
       exec { 'Stop default Tomcat temporarily':
@@ -108,6 +107,8 @@ define dspace::tomcat_instance ($package,
         # Must run before making any permission changes to Tomcat
         before  => [File_line["Update Tomcat to run as ${owner}"], File_line['Update Tomcat run options'], File[$catalina_base]]
       }
+
+      ->
 
       # Modify the Tomcat "defaults" file to make Tomcat run as the $owner
       # NOTE: This seems to be the ONLY way to update /etc/init.d script when installing from packages on Ubuntu.
@@ -119,6 +120,8 @@ define dspace::tomcat_instance ($package,
         notify  => Service['tomcat'],                         # Notify service to restart
       }
 
+      ->
+
       # Modify the Tomcat "defaults" file to set custom JAVA_OPTS based on the $catalina_opts
       # Again, seems to be the ONLY way to update /etc/init.d script when installing from packages on Ubuntu.
       file_line { 'Update Tomcat run options':
@@ -128,6 +131,8 @@ define dspace::tomcat_instance ($package,
         require => Tomcat::Instance[$catalina_base],         # Tomcat instance must be created first
         notify  => Service['tomcat'],                         # Notify service to restart
       }
+
+      -> 
 
       # In order for Tomcat to function properly, the entire CATALINA_BASE directory
       # and all subdirectories need to be owned by $owner
@@ -172,7 +177,7 @@ define dspace::tomcat_instance ($package,
       tomcat::install { "Uninstall ${package}":
         install_from_source => false,           # Don't install from source, we'll use package manager to install Tomcat
         package_name        => $package,        # Name of Tomcat package
-        package_ensure      => absent,          # Ensure it is REMOVED
+        package_ensure      => purged,          # Ensure it is REMOVED
       }
 
     }
