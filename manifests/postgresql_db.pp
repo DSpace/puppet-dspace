@@ -40,9 +40,10 @@ define dspace::postgresql_db ($version,
     class { 'postgresql::globals':
       encoding => 'UTF-8',
       # Setup the official Postgresql apt repos (in sources).
-      # Necessary to install a newer version of Postgres than what is in apt by default
+      # Necessary to install a different version of Postgres than what is in apt by default
       manage_package_repo => true,
       version  => $version,
+      needs_initdb => true,
     }
 
     ->
