@@ -57,6 +57,8 @@ define dspace::postgresql_db ($version,
       listen_addresses           => '*',           # accept connections from any IP/machine
       postgres_password          => $postgres_password,      # set password for "postgres"
       port                       => $port,
+      service_reload             => "service postgresql restart",
+      service_restart_on_change  => true,
     }
 
     # Ensure the PostgreSQL contrib package is installed
