@@ -61,6 +61,11 @@ define dspace::postgresql_db ($version,
     # (includes various extensions, like pgcrypto which is required by DSpace)
     class { 'postgresql::server::contrib': }
 
+    # Turn on logging_collector, enables logs in /var/lib/postgresql/[version]/main/pg_log/
+    postgresql::server::config_entry { 'logging_collector':
+      value  => 'on',
+    }
+
     # Create a database & user account (which owns the database)
     postgresql::server::db { $db_name:
       user     => $user,
