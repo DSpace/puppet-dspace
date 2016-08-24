@@ -20,6 +20,7 @@
 # - $user            => Name of database user to create for DSpace (default='dspace')
 # - $password        => Password of DSpace database user (default='dspace')
 # - $port            => PostgreSQL port (default=5432)
+# - $locale          => Locale for PostgreSQL (default='en_US.UTF-8')
 #
 # Sample Usage:
 # dspace::postgresql_db { 'dspace':
@@ -30,7 +31,8 @@ define dspace::postgresql_db ($version,
                               $db_name = $name,
                               $user = 'dspace',
                               $password = 'dspace',
-                              $port = 5432)
+                              $port = 5432,
+                              $locale = 'en_US.UTF-8')
 {
 
     # Init PostgreSQL module
@@ -39,11 +41,11 @@ define dspace::postgresql_db ($version,
     # DSpace also requires version 9.4 or above. We'll use 9.4
     class { 'postgresql::globals':
       encoding => 'UTF-8',
+      locale   => $locale,
       # Setup the official Postgresql apt repos (in sources).
       # Necessary to install a different version of Postgres than what is in apt by default
       manage_package_repo => true,
       version  => $version,
-      needs_initdb => true,
     }
 
     ->
