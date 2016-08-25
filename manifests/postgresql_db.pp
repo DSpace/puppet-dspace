@@ -21,6 +21,8 @@
 # - $password        => Password of DSpace database user (default='dspace')
 # - $port            => PostgreSQL port (default=5432)
 # - $locale          => Locale for PostgreSQL (default='en_US.UTF-8')
+# - $manage_package_repo => Setup the official Postgresql apt repos (in sources). (default=false)
+#                           Set to true to install a different version of Postgres than what is in apt.
 #
 # Sample Usage:
 # dspace::postgresql_db { 'dspace':
@@ -32,19 +34,20 @@ define dspace::postgresql_db ($version,
                               $user = 'dspace',
                               $password = 'dspace',
                               $port = 5432,
-                              $locale = 'en_US.UTF-8')
+                              $locale = 'en_US.UTF-8',
+                              $manage_package_repo = false)
 {
 
     # Init PostgreSQL module
     # (We use https://github.com/puppetlabs/puppetlabs-postgresql/)
     # DSpace requires UTF-8 encoding in PostgreSQL
-    # DSpace also requires version 9.4 or above. We'll use 9.4
+    # DSpace also requires version 9.4 or above.
     class { 'postgresql::globals':
       encoding => 'UTF-8',
       locale   => $locale,
       # Setup the official Postgresql apt repos (in sources).
       # Necessary to install a different version of Postgres than what is in apt by default
-      manage_package_repo => true,
+      manage_package_repo => $manage_package_repo,
       version  => $version,
     }
 
