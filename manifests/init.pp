@@ -7,12 +7,41 @@
 # - Ubuntu 16.04
 #
 # Parameters:
-# - $java => version of Java (e.g. "8")
+# (see long list below)
 #
 # Sample Usage:
 # include dspace
 #
-class dspace($java_version = "8")
+class dspace(
+  $java_version       = '8',
+  $owner              = 'dspace',
+  $group              = $owner,
+  $src_dir            = "/home/${owner}/dspace-src",
+  $install_dir        = "/home/${owner}/dspace",
+  $installer_dir_name = 'dspace-installer',
+  $git_repo           = 'https://github.com/DSpace/DSpace.git',
+  $git_branch         = 'master',
+  $mvn_params         = '',
+  # PostgreSQL DB Settings (optional)
+  $postgresql_version = '9.5',
+  $db_name            = 'dspace',
+  $db_admin           = 'postgres',
+  $db_admin_passwd    = undef,
+  $db_owner           = 'dspace',
+  $db_owner_passwd    = undef,
+  $db_port            = 5432,
+  $db_locale          = 'en_US.UTF-8',
+  # Tomcat Settings (optional)
+  $tomcat_package     = 'tomcat8',
+  $tomcat_port        = 8080,
+  $catalina_opts      = '-Djava.awt.headless=true -Dfile.encoding=UTF-8 -Xmx2048m -Xms1024m -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC',
+  # DSpace Admin User Account settings (optional)
+  $admin_firstname    = undef,
+  $admin_lastname     = undef,
+  $admin_email        = undef,
+  $admin_passwd       = undef,
+  $admin_language     = undef
+)
 {
     # Default to requiring all packages be installed
     Package {

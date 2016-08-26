@@ -10,14 +10,13 @@
 #
 # Parameters:
 # - $owner (REQUIRED)   => OS User who should own DSpace instance
-# - $version (REQUIRED) => Version of DSpace to install (e.g. "3.0", "3.1", "4.0", etc)
 # - $group              => Group who should own DSpace instance. Defaults to same as $owner
 # - $src_dir            => Location where DSpace source should be kept (defaults to the home directory of $owner at ~/dspace-src)
 # - $install_dir        => Location where DSpace instance should be installed (defaults to $name)
 # - $git_repo           => Git repository to pull DSpace source from. Defaults to DSpace/DSpace in GitHub
 # - $git_branch         => Git branch to build DSpace from. Defaults to "master".
 # - $mvn_params         => Any build params passed to Maven. Defaults to "-Denv=custom" which tells Maven to use the custom.properties file.
-# - $ant_installer_dir  => Full path of directory where the Ant installer is built to (via Maven).
+# - $ant_installer_dir  => Name of directory where the Ant installer is built to (via Maven).
 # - $admin_firstname    => First Name of the created default DSpace Administrator account.
 # - $admin_lastname     => Last Name of the created default DSpace Administrator account.
 # - $admin_email        => Email of the created default DSpace Administrator account.
@@ -28,26 +27,27 @@
 # Sample Usage:
 # dspace::install { '/dspace':
 #    owner      => "dspace",
-#    version    => "6.0-SNAPSHOT",
 #    git_branch => "master",
 # }
 #
-define dspace::install ($owner,
-                        $version,
-                        $group             = $owner,
-                        $src_dir           = "/home/${owner}/dspace-src",
+define dspace::install ($owner             = $dspace::owner,
+                        $group             = $dspace::group,
+                        $src_dir           = $dspace::src_dir,
                         $install_dir       = $name,
-                        $git_repo          = "https://github.com/DSpace/DSpace.git",
-                        $git_branch        = "master",
-                        $mvn_params        = "",
-                        $ant_installer_dir = "/home/${owner}/dspace-src/dspace/target/dspace-installer",
-                        $admin_firstname   = undef,
-                        $admin_lastname    = undef,
-                        $admin_email       = undef,
-                        $admin_passwd      = undef,
-                        $admin_language    = undef,
+                        $git_repo          = $dspace::git_repo,
+                        $git_branch        = $dspace::git_branch,
+                        $mvn_params        = $dspace::mvn_params,
+                        $ant_installer_dir = $dspace::installer_dir_name,
+                        $admin_firstname   = $dspace::admin_firstname,
+                        $admin_lastname    = $dspace::admin_lastname,
+                        $admin_email       = $dspace::admin_email,
+                        $admin_passwd      = $dspace::admin_passwd,
+                        $admin_language    = $dspace::admin_language,
                         $ensure            = present)
 {
+    # Full path to Ant Installer (based on passed in $src_dir)
+    $ant_installer_path = "${src_dir}/dspace/target/${ant_installer_dir}"
+
 
     # ensure that the install_dir exists, and has proper permissions
     file { "${install_dir}":
@@ -55,16 +55,6 @@ define dspace::install ($owner,
         owner  => $owner,
         group  => $group,
         mode   => 0700,
-    }
-
-->
-
-    # Ensure a custom ~/.profile exists (with JAVA_HOME & MAVEN_HOME defined)
-    file { "/home/${owner}/.profile" :
-        ensure  => file,
-        owner   => $owner,
-        group   => $group,
-        content => template("dspace/profile.erb"),
     }
 
 ->
@@ -139,7 +129,7 @@ define dspace::install ($owner,
      command   => "mvn package ${mvn_params}",
      cwd       => "${src_dir}", # Run command from this directory
      user      => $owner,
-     creates   => $ant_installer_dir, # Only run if Ant installer directory doesn't already exist
+     creates   => $ant_installer_path, # Only run if Ant installer directory doesn't already exist
      timeout   => 0, # Disable timeout. This build takes a while!
      logoutput => true,    # Send stdout to puppet log file (if any)
    }
@@ -149,7 +139,7 @@ define dspace::install ($owner,
    # Install DSpace (via Ant)
    exec { "Install DSpace to ${install_dir}":
      command   => "ant fresh_install",
-     cwd       => $ant_installer_dir,    # Run command from this directory
+     cwd       => $ant_installer_path,    # Run command from this directory
      user      => $owner,
      creates   => "${install_dir}/webapps/xmlui",    # Only run if XMLUI webapp doesn't yet exist (NOTE: we check for a webapp's existence since this is the *last step* of the install process)
      logoutput => true,    # Send stdout to puppet log file (if any)

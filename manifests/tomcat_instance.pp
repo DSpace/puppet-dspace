@@ -29,14 +29,14 @@
 # dspace::tomcat_instance {
 #    package    => 'tomcat8',
 # }
-define dspace::tomcat_instance ($package,
-                                $owner = $package,
-                                $group = $package,
-                                $service = $package,
-                                $catalina_home = "/usr/share/${package}",
-                                $catalina_base = "/var/lib/${package}",
+define dspace::tomcat_instance ($package       = $dspace::tomcat_package,
+                                $owner         = $dspace::owner,
+                                $group         = $dspace::group,
+                                $service       = $dspace::tomcat_package,
+                                $catalina_home = "/usr/share/${dspace::tomcat_package}",
+                                $catalina_base = "/var/lib/${dspace::tomcat_package}",
                                 $app_base      = $name,
-                                $port          = 8080,
+                                $port          = $dspace::tomcat_port,
                                 $catalina_opts = "-Djava.awt.headless=true -Dfile.encoding=UTF-8 -Xmx2048m -Xms1024m -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC",
                                 $ensure        = present)
 {

@@ -28,13 +28,13 @@
 # dspace::postgresql_db { 'dspace':
 #    version => '9.4',
 # }
-define dspace::postgresql_db ($version,
-                              $postgres_password = undef,
-                              $db_name = $name,
-                              $user = 'dspace',
-                              $password = 'dspace',
-                              $port = 5432,
-                              $locale = 'en_US.UTF-8',
+define dspace::postgresql_db ($version      = $dspace::postgresql_version,
+                              $admin_passwd = $dspace::db_admin_passwd,
+                              $db_name      = $name,
+                              $owner        = $dspace::db_owner,
+                              $owner_passwd = $dspace::db_owner_passwd,
+                              $port         = $dspace::db_port,
+                              $locale       = $dspace::db_locale,
                               $manage_package_repo = false)
 {
 
@@ -58,7 +58,7 @@ define dspace::postgresql_db ($version,
       ip_mask_deny_postgres_user => '0.0.0.0/32',  # allows 'postgres' user to connect from any IP
       ip_mask_allow_all_users    => '0.0.0.0/0',   # allow other users to connect from any IP
       listen_addresses           => '*',           # accept connections from any IP/machine
-      postgres_password          => $postgres_password,      # set password for "postgres"
+      postgres_password          => $admin_passwd, # set password for "postgres"
       port                       => $port,
       service_reload             => "service postgresql restart",
       service_restart_on_change  => true,
@@ -75,9 +75,9 @@ define dspace::postgresql_db ($version,
 
     # Create a database & user account (which owns the database)
     postgresql::server::db { $db_name:
-      user     => $user,
-      password => postgresql_password($user, $password),
-      owner    => $user,
+      user     => $owner,
+      password => postgresql_password($owner, $owner_passwd),
+      owner    => $owner,
     }
 
     # Activate the 'pgcrypto' extension on our 'dspace' database
