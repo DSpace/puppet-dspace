@@ -14,13 +14,13 @@
 # - Ubuntu 16.04
 #
 # Parameters:
-# - $version (REQUIRED) => Version of PostgreSQL to install (e.g. '9.4', '9.5', etc)
-# - $postgres_password  => Password for the 'postgres' user who owns Postgres (default=undef, i.e. no password)
-# - $db_name            => Name of database to create for DSpace (default=$name)
-# - $user            => Name of database user to create for DSpace (default='dspace')
-# - $password        => Password of DSpace database user (default='dspace')
-# - $port            => PostgreSQL port (default=5432)
-# - $locale          => Locale for PostgreSQL (default='en_US.UTF-8')
+# - $version       => Version of PostgreSQL to install (e.g. '9.4', '9.5', etc)
+# - $admin_passwd  => Password for the 'postgres' user who owns Postgres (default=undef, i.e. no password)
+# - $db_name       => Name of database to create for DSpace (default=$name)
+# - $owner         => Name of database user to create for DSpace (default='dspace')
+# - $owner_passwd  => Password of DSpace database user (default='dspace')
+# - $port          => PostgreSQL port (default=5432)
+# - $locale        => Locale for PostgreSQL (default='en_US.UTF-8')
 # - $manage_package_repo => Setup the official Postgresql apt repos (in sources). (default=false)
 #                           Set to true to install a different version of Postgres than what is in apt.
 #

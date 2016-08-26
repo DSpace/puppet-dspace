@@ -14,16 +14,16 @@
 # - Ubuntu 16.04
 #
 # Parameters:
-# - $package (REQUIRED) => Tomcat package to install/use (e.g. 'tomcat7', 'tomcat8', etc)
-# - $owner              => OS account which should own Tomcat (i.e. who Tomcat should run as). Default=name of package (e.g. tomcat8)
-# - $group              => OS group which should own Tomcat (default is same as $owner)
-# - $service            => Name of the default Tomcat service (default is same as $package)
-# - $catalina_home      => Full path to Catalina Home (default=/usr/share/$package), i.e. installation directory
-# - $catalina_base      => Full path to Catalina Base (default=/var/lib/$package), i.e. instance directory
-# - $catalina_opts      => Options to pass to Tomcat (default='-Djava.awt.headless=true -Dfile.encoding=UTF-8 -Xmx2048m -Xms1024m -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC')
-# - $app_base           => Directory where Tomcat instance should load webapps (default=$name)
-# - $port               => Port this Tomcat instance runs on
-# - $ensure             => Whether to install (ensure=present) or remove (ensure=absent) this Tomcat instance (default=present)
+# - $package        => Tomcat package to install/use (e.g. 'tomcat7', 'tomcat8', etc)
+# - $owner          => OS account which should own Tomcat (i.e. who Tomcat should run as). Default=name of package (e.g. tomcat8)
+# - $group          => OS group which should own Tomcat (default is same as $owner)
+# - $service        => Name of the default Tomcat service (default is same as $package)
+# - $catalina_home  => Full path to Catalina Home (default=/usr/share/$package), i.e. installation directory
+# - $catalina_base  => Full path to Catalina Base (default=/var/lib/$package), i.e. instance directory
+# - $app_base       => Directory where Tomcat instance should load webapps (default=$name)
+# - $port           => Port this Tomcat instance runs on
+# - $catalina_opts  => Options to pass to Tomcat (default='-Djava.awt.headless=true -Dfile.encoding=UTF-8 -Xmx2048m -Xms1024m -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC')
+# - $ensure         => Whether to install (ensure=present) or remove (ensure=absent) this Tomcat instance (default=present)
 #
 # Sample Usage:
 # dspace::tomcat_instance {
@@ -37,7 +37,7 @@ define dspace::tomcat_instance ($package       = $dspace::tomcat_package,
                                 $catalina_base = "/var/lib/${dspace::tomcat_package}",
                                 $app_base      = $name,
                                 $port          = $dspace::tomcat_port,
-                                $catalina_opts = "-Djava.awt.headless=true -Dfile.encoding=UTF-8 -Xmx2048m -Xms1024m -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC",
+                                $catalina_opts = $dspace::catalina_opts,
                                 $ensure        = present)
 {
 
@@ -132,7 +132,7 @@ define dspace::tomcat_instance ($package       = $dspace::tomcat_package,
         notify  => Service['tomcat'],                         # Notify service to restart
       }
 
-      -> 
+      ->
 
       # In order for Tomcat to function properly, the entire CATALINA_BASE directory
       # and all subdirectories need to be owned by $owner

@@ -9,9 +9,9 @@
 # - Ubuntu 16.04
 #
 # Parameters:
-# - $owner (REQUIRED)   => OS User who should own DSpace instance
-# - $group              => Group who should own DSpace instance. Defaults to same as $owner
-# - $src_dir            => Location where DSpace source should be kept (defaults to the home directory of $owner at ~/dspace-src)
+# - $owner              => OS User who should own DSpace instance
+# - $group              => Group who should own DSpace instance.
+# - $src_dir            => Location where DSpace source should be kept
 # - $install_dir        => Location where DSpace instance should be installed (defaults to $name)
 # - $git_repo           => Git repository to pull DSpace source from. Defaults to DSpace/DSpace in GitHub
 # - $git_branch         => Git branch to build DSpace from. Defaults to "master".

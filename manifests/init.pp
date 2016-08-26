@@ -7,7 +7,30 @@
 # - Ubuntu 16.04
 #
 # Parameters:
-# (see long list below)
+# - $java_version       => Version of OpenJDK to install (default '8')
+# - $owner              => OS Owner of DSpace (account must exist or be created by dspace::owner)
+# - $group              => OS Group of DSpace owner
+# - $src_dir            => Location where DSpace source should be kept (defaults to the home directory of $owner at ~/dspace-src)
+# - $install_dir        => Location where DSpace instance should be installed (defaults to $name)
+# - $installer_dir_name => Name of directory where the Ant installer is built to (via Maven).
+# - $git_repo           => Git repository to pull DSpace source from. Defaults to DSpace/DSpace in GitHub
+# - $git_branch         => Git branch to build DSpace from. Defaults to "master".
+# - $mvn_params         => Any build params passed to Maven.
+# - $postgresql_version => Version of PostgreSQL to install (e.g. '9.5', etc)
+# - $db_name            => Name of database to create for DSpace (default=$name)
+# - $db_admin_passwd    => Password for the 'postgres' user who owns Postgres (default=undef, i.e. no password)
+# - $db_owner           => Name of database user to create for DSpace (default='dspace')
+# - $db_owner_passwd    => Password of DSpace database user (default='dspace')
+# - $db_port            => PostgreSQL port (default=5432)
+# - $db_locale          => Locale for PostgreSQL (default='en_US.UTF-8')
+# - $tomcat_package     => Tomcat package to install/use (e.g. 'tomcat8', etc)
+# - $tomcat_port        => Port this Tomcat instance runs on
+# - $catalina_opts      => Options to pass to Tomcat (default='-Djava.awt.headless=true -Dfile.encoding=UTF-8 -Xmx2048m -Xms1024m -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC')
+# - $admin_firstname    => First Name of the created default DSpace Administrator account.
+# - $admin_lastname     => Last Name of the created default DSpace Administrator account.
+# - $admin_email        => Email of the created default DSpace Administrator account.
+# - $admin_passwd       => Initial Password of the created default DSpace Administrator account.
+# - $admin_language     => Language of the created default DSpace Administrator account.
 #
 # Sample Usage:
 # include dspace
