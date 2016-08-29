@@ -22,6 +22,7 @@
 # - $admin_email        => Email of the created default DSpace Administrator account.
 # - $admin_passwd       => Initial Password of the created default DSpace Administrator account.
 # - $admin_language     => Language of the created default DSpace Administrator account.
+# - $handle_prefix      => Handle Prefix to use for this site (default = 123456789)
 # - $ensure => Whether to ensure DSpace instance is created ('present', default value) or deleted ('absent')
 #
 # Sample Usage:
@@ -48,6 +49,7 @@ define dspace::install ($owner             = $dspace::owner,
                         $db_port           = $dspace::db_port,
                         $db_user           = $dspace::db_owner,
                         $db_passwd         = $dspace::db_owner_passwd,
+                        $handle_prefix     = $dspace::handle_prefix,
                         $ensure            = present)
 {
     # Full path to Ant Installer (based on passed in $src_dir)

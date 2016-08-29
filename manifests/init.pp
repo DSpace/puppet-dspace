@@ -32,6 +32,7 @@
 # - $admin_email        => Email of the created default DSpace Administrator account.
 # - $admin_passwd       => Initial Password of the created default DSpace Administrator account.
 # - $admin_language     => Language of the created default DSpace Administrator account.
+# - $handle_prefix      => Handle Prefix to use for this site (default = 123456789)
 #
 # Sample Usage:
 # include dspace
@@ -66,7 +67,8 @@ class dspace(
   $admin_lastname     = undef,
   $admin_email        = undef,
   $admin_passwd       = undef,
-  $admin_language     = undef
+  $admin_language     = undef,
+  $handle_prefix      = '123456789',
 )
 {
     # Default to requiring all packages be installed
