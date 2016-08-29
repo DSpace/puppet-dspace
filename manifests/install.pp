@@ -43,6 +43,11 @@ define dspace::install ($owner             = $dspace::owner,
                         $admin_email       = $dspace::admin_email,
                         $admin_passwd      = $dspace::admin_passwd,
                         $admin_language    = $dspace::admin_language,
+                        $port              = $dspace::tomcat_port,
+                        $db_name           = $dspace::db_name,
+                        $db_port           = $dspace::db_port,
+                        $db_user           = $dspace::db_owner,
+                        $db_passwd         = $dspace::db_owner_passwd,
                         $ensure            = present)
 {
     # Full path to Ant Installer (based on passed in $src_dir)
@@ -112,7 +117,7 @@ define dspace::install ($owner             = $dspace::owner,
 ->
 
 # Create a 'local.cfg' file which will be used by newer versions of DSpace (6+) to build the DSpace installer
-   file { "${src_dir}/local.cfg":
+   file { "${src_dir}/dspace/config/local.cfg":
      ensure  => file,
      owner   => $owner,
      group   => $group,

@@ -28,7 +28,7 @@ dspace.install.dir=<%=@install_dir%>
 dspace.hostname = localhost
 
 # DSpace base host URL.  Include port number etc.
-dspace.baseUrl = http://localhost:8080
+dspace.baseUrl = http://localhost:<%=@port%>
 
 # The user interface you will be using for DSpace. Common usage is either xmlui or jspui
 dspace.ui = xmlui
@@ -44,7 +44,7 @@ dspace.url = ${dspace.baseUrl}/${dspace.ui}
 dspace.name = My DSpace Site
 
 # Solr server
-solr.server=http://localhost:8080/solr
+solr.server = ${dspace.baseUrl}/solr
 
 # Default language for metadata values
 default.language = en_US
@@ -60,9 +60,9 @@ db.name=postgres
 # postgres
 db.driver=org.postgresql.Driver
 db.dialect=org.dspace.storage.rdbms.hibernate.postgres.DSpacePostgreSQL82Dialect
-db.url=jdbc:postgresql://localhost:5432/dspace
-db.username=dspace
-db.password=dspace
+db.url=jdbc:postgresql://localhost:<%=@db_port%>/<%=@db_name%>
+db.username=<%=@db_user%>
+db.password=<%=@db_passwd%>
 db.schema=public
 
 # oracle

@@ -1,3 +1,4 @@
+
 # Class: dspace
 #
 # This class does the following:
@@ -57,6 +58,8 @@ class dspace(
   # Tomcat Settings (optional)
   $tomcat_package     = 'tomcat8',
   $tomcat_port        = 8080,
+  $catalina_home      = "/usr/share/${tomcat_package}",
+  $catalina_base      = "/var/lib/${tomcat_package}",
   $catalina_opts      = '-Djava.awt.headless=true -Dfile.encoding=UTF-8 -Xmx2048m -Xms1024m -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC',
   # DSpace Admin User Account settings (optional)
   $admin_firstname    = undef,
