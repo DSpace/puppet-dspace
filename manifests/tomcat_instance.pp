@@ -8,7 +8,8 @@
 # for this to work!
 #
 # Optionally, you can also choose to install Tomcat via other means
-# (manually or write your own puppet script)
+# (manually or write your own puppet script). In this situation, this script
+# may provide a good starting point.
 #
 # Tested on:
 # - Ubuntu 16.04
@@ -22,6 +23,7 @@
 # - $catalina_base  => Full path to Catalina Base (default=/var/lib/$package), i.e. instance directory
 # - $app_base       => Directory where Tomcat instance should load webapps (default=$name)
 # - $port           => Port this Tomcat instance runs on
+# - $ajp_port       => AJP port for Tomcat redirects. Only useful to set if using Apache webserver + Tomcat (see apache_site.pp)
 # - $catalina_opts  => Options to pass to Tomcat (default='-Djava.awt.headless=true -Dfile.encoding=UTF-8 -Xmx2048m -Xms1024m -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC')
 # - $ensure         => Whether to install (ensure=present) or remove (ensure=absent) this Tomcat instance (default=present)
 #
@@ -37,6 +39,7 @@ define dspace::tomcat_instance ($package       = $dspace::tomcat_package,
                                 $catalina_base = $dspace::catalina_base,
                                 $app_base      = $name,
                                 $port          = $dspace::tomcat_port,
+                                $ajp_port      = $dspace::tomcat_ajp_port,
                                 $catalina_opts = $dspace::catalina_opts,
                                 $ensure        = present)
 {
@@ -78,8 +81,7 @@ define dspace::tomcat_instance ($package       = $dspace::tomcat_package,
         protocol            => 'HTTP/1.1',
         additional_attributes => {
           'connectionTimeout' => '20000',
-          'URIEncoding'       => 'UTF-8',
-          'redirectPort'      => '8443'
+          'URIEncoding'       => 'UTF-8'
         },
       }
 
@@ -143,6 +145,21 @@ define dspace::tomcat_instance ($package       = $dspace::tomcat_package,
         links   => follow,              # Follow any links to and change ownership there too
         require => Tomcat::Instance[$catalina_base],         # Tomcat instance must be created first
         notify  => Service['tomcat'],                         # Notify service to restart
+      }
+
+      # If an AJP port was specified, add an AJP connector for it
+      if $ajp_port {
+        # Add the AJP connector to use specified $ajp_port and UTF-8
+        tomcat::config::server::connector { "Add ${package} AJP connector":
+          catalina_base       => $catalina_base,  # Tomcat instance this pertains to
+          port                => $ajp_port,
+          protocol            => 'AJP/1.3',
+          additional_attributes => {
+            'URIEncoding'       => 'UTF-8',
+          },
+          require => Tomcat::Instance[$catalina_base],   # Tomcat instance must be created first
+          notify  => Service['tomcat'],                  # Notify service to restart
+        }
       }
 
       # This service is auto-created in /etc/init.d by package manager

@@ -26,6 +26,7 @@
 # - $db_locale          => Locale for PostgreSQL (default='en_US.UTF-8')
 # - $tomcat_package     => Tomcat package to install/use (e.g. 'tomcat8', etc)
 # - $tomcat_port        => Port this Tomcat instance runs on
+# - $tomcat_ajp_port    => AJP port for Tomcat. Only useful to set if using Apache webserver + Tomcat (see apache_site.pp)
 # - $catalina_opts      => Options to pass to Tomcat (default='-Djava.awt.headless=true -Dfile.encoding=UTF-8 -Xmx2048m -Xms1024m -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC')
 # - $admin_firstname    => First Name of the created default DSpace Administrator account.
 # - $admin_lastname     => Last Name of the created default DSpace Administrator account.
@@ -59,6 +60,7 @@ class dspace(
   # Tomcat Settings (optional)
   $tomcat_package     = 'tomcat8',
   $tomcat_port        = 8080,
+  $tomcat_ajp_port    = undef,
   $catalina_home      = "/usr/share/${tomcat_package}",
   $catalina_base      = "/var/lib/${tomcat_package}",
   $catalina_opts      = '-Djava.awt.headless=true -Dfile.encoding=UTF-8 -Xmx2048m -Xms1024m -XX:MaxPermSize=256m -XX:+UseConcMarkSweepGC',

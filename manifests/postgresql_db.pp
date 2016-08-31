@@ -8,7 +8,8 @@
 # for this to work!
 #
 # Optionally, you can also choose to install PostgreSQL via other means
-# (manually or write your own puppet script)
+# (manually or write your own puppet script). In this situation, this script
+# may provide a good starting point.
 #
 # Tested on:
 # - Ubuntu 16.04
