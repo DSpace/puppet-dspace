@@ -11,6 +11,7 @@
 # - $groups		         => Additional groups (by name) to add user to
 # - $sudoer              => Whether this person gets sudoer access (true or false, default=false)
 # - $ensure              => Whether to ensure account is added (present) or deleted (absent)
+# - $maven_opts          => value for this user's MAVEN_OPTS environment variable
 #
 # Sample Usage:
 # dspace::owner { 'dspace':
@@ -19,6 +20,7 @@ define dspace::owner ($username = $name,
                       $gid = $username,
                       $groups = undef,
                       $sudoer = false,
+                      $maven_opts = '-Xmx512m',
                       $ensure = 'present')
 {
 
@@ -48,14 +50,6 @@ define dspace::owner ($username = $name,
         group   => $gid,
         mode    => 0750,
         require => User[$username],
-      }
-
-      # Ensure a custom ~/.profile exists (with JAVA_HOME & MAVEN_HOME defined)
-      file { "/home/${username}/.profile" :
-        ensure  => file,
-        owner   => $username,
-        group   => $gid,
-        content => template("dspace/user-profile.erb"),
       }
 
       # Make sure the ~/.bashrc includes 'umask 002' line
