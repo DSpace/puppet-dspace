@@ -50,14 +50,6 @@ define dspace::owner ($username = $name,
         require => User[$username],
       }
 
-      # Ensure a custom ~/.profile exists (with JAVA_HOME & MAVEN_HOME defined)
-      file { "/home/${username}/.profile" :
-        ensure  => file,
-        owner   => $username,
-        group   => $gid,
-        content => template("dspace/user-profile.erb"),
-      }
-
       # Make sure the ~/.bashrc includes 'umask 002' line
       file_line { "Set default umask for ${username}":
         path    => "/home/${username}/.bashrc",
