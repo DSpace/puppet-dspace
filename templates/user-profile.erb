@@ -31,9 +31,8 @@ export MAVEN_HOME="/usr/share/maven"
 # This ensures that you can simply run 'mvn package' from the command-line and Maven will default to using 'vagrant.properties'.
 # export MAVEN_OPTS="-Denv=vagrant" #not needed for DSpace 6+
 
-# use MAVEN_OPTS to set a max heap size of 512MB, to help with smaller VMs
-# (~2GB or less) Maven doesn't really need any more than that anyway
-export MAVEN_OPTS="-Xmx512m"
+# use the MAVEN_OPTS configured in the owner.pp manifest
+export MAVEN_OPTS="<%= @maven_opts %>"
 
 # change the prompt to include the git branch name, which is insanely helpful
 # Also change the prompt to include flags to indicate dirty state (*), stash state ($),
