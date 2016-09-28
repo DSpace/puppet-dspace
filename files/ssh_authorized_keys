@@ -1,0 +1,8 @@
+# This file may be used to allow SSH access to the DSpace owner account
+# on this system.
+#
+# Simply add Public SSH keys to this file for any user who should be able to
+# SSH in as the DSpace owner.
+#
+# WARNING: This file is managed by Puppet. It is recommended to edit it in 
+# the Puppet source code and rerun 'puppet apply'

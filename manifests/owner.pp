@@ -8,8 +8,10 @@
 # Parameters:
 # - $username (REQUIRED) => OS Username (e.g. "dspace"), defaults to passed in $name
 # - $gid                 => OS User's primary group (default is same as $username)
-# - $groups		         => Additional groups (by name) to add user to
+# - $groups		 => Additional groups (by name) to add user to
 # - $sudoer              => Whether this person gets sudoer access (true or false, default=false)
+# - $authorized_keys_source => Location of file which provides content for SSH authorized_keys
+#                              (defaults to files/ssh_authorized_keys in this module)
 # - $ensure              => Whether to ensure account is added (present) or deleted (absent)
 # - $maven_opts          => value for this user's MAVEN_OPTS environment variable
 #
@@ -20,6 +22,7 @@ define dspace::owner ($username = $name,
                       $gid = $username,
                       $groups = undef,
                       $sudoer = false,
+                      $authorized_keys_source = "puppet:///modules/dspace/ssh_authorized_keys",
                       $maven_opts = '-Xmx512m',
                       $ensure = 'present')
 {
@@ -75,8 +78,7 @@ define dspace::owner ($username = $name,
         owner   => $username,
         group   => $gid,
         mode    => 0600,
-        content  => "# Add Committer Public SSH keys to this file",
-        replace => false,      # Don't overwrite changes to file
+        source  => $authorized_keys_source,
         require => File["/home/${username}/.ssh"],
       }
 
