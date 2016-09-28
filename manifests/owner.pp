@@ -37,6 +37,11 @@ define dspace::owner ($username = $name,
     # Present = Create User & Initialize
     present: {
 
+      # Ensure the user's group exists (if not, create it)
+      group { $gid:
+        ensure => present,
+      }
+
       # Create the user account on the system
       user { $username:
         home       => "/home/$username",
@@ -44,6 +49,7 @@ define dspace::owner ($username = $name,
         shell      => "/bin/bash",
         gid        => $gid,  # user's primary group
         groups     => $groups,
+        require    => Group[$gid],
       }
 
       # Make sure they have a home with proper permissions.
