@@ -23,6 +23,8 @@
 # - $admin_passwd       => Initial Password of the created default DSpace Administrator account.
 # - $admin_language     => Language of the created default DSpace Administrator account.
 # - $handle_prefix      => Handle Prefix to use for this site (default = 123456789)
+# - $local_config_source=> Can be used to override the default local.cfg with one of your own
+#                          Specify a valid Puppet "source", which could be a file location, HTTP URL, etc. 
 # - $ensure => Whether to ensure DSpace instance is created ('present', default value) or deleted ('absent')
 #
 # Sample Usage:
@@ -50,6 +52,7 @@ define dspace::install ($owner             = $dspace::owner,
                         $db_user           = $dspace::db_owner,
                         $db_passwd         = $dspace::db_owner_passwd,
                         $handle_prefix     = $dspace::handle_prefix,
+                        $local_config_source = undef,
                         $ensure            = present)
 {
     # Full path to Ant Installer (based on passed in $src_dir)
@@ -112,23 +115,39 @@ define dspace::install ($owner             = $dspace::owner,
      owner   => $owner,
      group   => $group,
      mode    => 0644,
-     backup  => ".puppet-bak",  # If replaced, backup old settings to .puppet-bak
      content => template("dspace/custom.properties.erb"),
    }
 
-->
 
-# Create a 'local.cfg' file which will be used by newer versions of DSpace (6+) to build the DSpace installer
-   file { "${src_dir}/dspace/config/local.cfg":
-     ensure  => file,
-     owner   => $owner,
-     group   => $group,
-     mode    => 0644,
-     backup  => ".puppet-bak",  # If replaced, backup old settings to .puppet-bak
-     content => template("dspace/local.cfg.erb"),
+
+   # Decide whether to initialize local.cfg (required for DSpace 6+) from a provided file ($local_source_config)
+   # Or from the default template (local.cfg.erb)
+   if $local_config_source {
+     # Initialize local.cfg from provided source file
+     file { "${src_dir}/dspace/config/local.cfg":
+       ensure  => file,
+       owner   => $owner,
+       group   => $group,
+       mode    => 0644,
+       source  => $local_config_source,
+       require => Exec["Checkout branch ${git_branch}"],
+       before  => Exec["Build DSpace installer in ${src_dir}"],
+     }
+   }
+   else {
+     # Create a 'local.cfg' file from our default template
+     file { "${src_dir}/dspace/config/local.cfg":
+       ensure  => file,
+       owner   => $owner,
+       group   => $group,
+       mode    => 0644,
+       content => template("dspace/local.cfg.erb"),
+       require => Exec["Checkout branch ${git_branch}"],
+       before  => Exec["Build DSpace installer in ${src_dir}"],
+     }
+
    }
 
-->
 
    # Build DSpace installer.
    # (NOTE: by default, $mvn_params='-Denv=custom', which tells Maven to use the custom.properties file created above)
@@ -136,20 +155,22 @@ define dspace::install ($owner             = $dspace::owner,
      command   => "mvn package ${mvn_params}",
      cwd       => "${src_dir}", # Run command from this directory
      user      => $owner,
-     creates   => $ant_installer_path, # Only run if Ant installer directory doesn't already exist
+     subscribe => File["${src_dir}/dspace/config/local.cfg"], # If local.cfg changes, rebuild
+     refreshonly => true,  # Only run if local.cfg changes
      timeout   => 0, # Disable timeout. This build takes a while!
      logoutput => true,    # Send stdout to puppet log file (if any)
+     notify    => Exec["Install DSpace to ${install_dir}"],  # Notify installation to run
    }
-
-->
 
    # Install DSpace (via Ant)
    exec { "Install DSpace to ${install_dir}":
-     command   => "ant fresh_install",
+     # If DSpace installed, this is an update. Otherwise a fresh_install
+     command   => "if [ -f ${install_dir}/bin/dspace ]; then ant update; else ant fresh_install; fi",
+     provider  => shell,   # Run as a shell command
      cwd       => $ant_installer_path,    # Run command from this directory
      user      => $owner,
-     creates   => "${install_dir}/webapps/xmlui",    # Only run if XMLUI webapp doesn't yet exist (NOTE: we check for a webapp's existence since this is the *last step* of the install process)
      logoutput => true,    # Send stdout to puppet log file (if any)
+     refreshonly => true,  # Only run when triggered (by build)
    }
 
    # Create initial administrator (if specified)
