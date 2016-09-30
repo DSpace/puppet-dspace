@@ -77,15 +77,17 @@ define dspace::owner ($username = $name,
         require => File["/home/${username}"],
       }
 
-      # Now make sure that the ssh key authorized files is around
-      # and is initialized with our custom contents
-      file { "/home/${username}/.ssh/authorized_keys":
-        ensure  => present,
-        owner   => $username,
-        group   => $gid,
-        mode    => 0600,
-        source  => $authorized_keys_source,
-        require => File["/home/${username}/.ssh"],
+      if $authorized_keys_source {
+        # Now make sure that the ssh key authorized files is around
+        # and is initialized with our custom contents
+        file { "/home/${username}/.ssh/authorized_keys":
+          ensure  => present,
+          owner   => $username,
+          group   => $gid,
+          mode    => 0600,
+          source  => $authorized_keys_source,
+          require => File["/home/${username}/.ssh"],
+        }
       }
 
       # If this person should be given sudo privileges
