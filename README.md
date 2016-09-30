@@ -1,7 +1,7 @@
 puppet-dspace (A basic Puppet DSpace installer)
 =============
 
-WORK IN PROGRESS.
+This module works to install DSpace on Ubuntu servers, and is used by the [vagrant-dspace](https://github.com/DSpace/vagrant-dspace) project and the [puppet-dspace-demo](https://github.com/DSpace-Labs/puppet-dspace-demo) module (used to create our http://demo.dspace.org site). However, your mileage may vary, and it has not been tested in Production scenarios. Pull requests are welcome!
 
 Module description
 ------------------
@@ -161,6 +161,12 @@ dspace::install { "/home/${dspace::owner}/dspace" :
   db_passwd       => 'dspace', # DB account password
 }
 ```
+
+### Putting it all together. Installing everything!
+
+A good example of installing everything (PostgreSQL, Tomcat and DSpace) together can be found in the `vagrant-dspace` [`setup.pp` Puppet script](https://github.com/DSpace/vagrant-dspace/blob/master/setup.pp). This script initialized the Vagrant VM using this `puppet-dspace` module.
+
+Another (similar) example can be found in the [`puppet-dspace-demo` module](https://github.com/DSpace-Labs/puppet-dspace-demo), which uses this `puppet-dspace` module to setup the http://demo.dspace.org demo site. In `puppet-dspace-demo`, the `manifests/site.pp` uses this module to install PostgreSQL, Tomcat, an OS owner account and DSpace.
 
 Development
 -------------
