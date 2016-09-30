@@ -83,13 +83,14 @@ define dspace::install ($owner             = $dspace::owner,
 ->
 
     exec { "Cloning DSpace source code into ${src_dir}":
-        command   => "git init && git remote add origin ${git_repo} && git fetch --all && git checkout master && chown -R ${owner}:${group} ${src_dir}",
+        command   => "git init && git remote add origin ${git_repo} && git fetch --all && git checkout master",
         creates   => "${src_dir}/.git",
+        user      => $owner,
         cwd       => $src_dir, # run command from this directory
         logoutput => true,
         tries     => 4,    # try 4 times
         timeout   => 1200, # set a 20 min timeout. DSpace source is big which could be slow on some connections
-     }
+    }
 
 
     ### END clone of DSpace
