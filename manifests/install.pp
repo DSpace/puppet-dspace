@@ -82,6 +82,9 @@ define dspace::install ($owner             = $dspace::owner,
 
 ->
     # ensure the GitHub SSH host authenticity is handled before we check out anything
+    # can return either 0 or 1, both are OK
+    # return 1 = warning about adding the fingerprint is thrown, this is a good thing, we want this
+    # return 0 = everything worked fine, the fingerprint is already configured
     exec { "Adding the fingerprint for GitHub so we can connect to it":
         command   => "ssh -T -oStrictHostKeyChecking=no git@github.com",
         returns   => [0,1],
